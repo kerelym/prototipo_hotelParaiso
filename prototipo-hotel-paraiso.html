@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hotel Paraíso · Prototipo</title>
+<style>
+:root{--bg:#f6f8f4;--card:#fff;--ink:#1d372e;--mut:#5b6b63;--brand:#2f8f1f;--brand-ink:#fff;--soft:#e9f3e4;--line:#d5dfd0;--err:#b3382f;--errbg:#fbeceb}
+@media (prefers-color-scheme:dark){:root{--bg:#13201b;--card:#1b2d26;--ink:#e8f1ea;--mut:#a3b5ab;--brand:#4cb83a;--brand-ink:#0d1a12;--soft:#22382f;--line:#2f4a3f;--err:#ff9a90;--errbg:#3a1f1d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif;display:flex;justify-content:center;padding:20px 12px}
+.phone{width:360px;max-width:100%;border:2px solid var(--ink);border-radius:26px;overflow:hidden;background:var(--card);min-height:600px;display:flex;flex-direction:column}
+.bar{background:var(--ink);color:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;font-size:.9rem}
+.bar button{color:var(--bg);background:none;border:0;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.scr{display:none;padding:18px;flex:1}.scr.on{display:block}
+h2{font-size:1.2rem;margin:0 0 4px}.mut{color:var(--mut);font-size:.9rem}
+label{display:block;font-size:.82rem;font-weight:600;margin:10px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input.bad{border-color:var(--err);background:var(--errbg)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.msg{color:var(--err);font-size:.82rem;min-height:1.1em;margin-top:2px}
+.banner{background:var(--errbg);color:var(--err);padding:8px 10px;border-radius:8px;font-size:.85rem;margin-top:12px;display:none}
+.btn{width:100%;margin-top:14px;padding:12px;border:0;border-radius:10px;background:var(--brand);color:var(--brand-ink);font:inherit;font-weight:700;cursor:pointer}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line);margin-top:8px}
+.room{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px}.room b{display:block}
+.code{font-size:1.5rem;font-weight:800;text-align:center;background:var(--soft);padding:12px;border-radius:10px;margin:12px 0}
+.pill{display:inline-block;background:var(--soft);padding:2px 10px;border-radius:999px;font-size:.8rem;margin:2px 4px 2px 0}
+</style>
+</head>
+<body>
+<div class="phone">
+<div class="bar"><b>HOTEL PARAÍSO</b><button onclick="go('s1')">Inicio</button></div>
+
+<!-- 1. Inicio / búsqueda -->
+<div class="scr on" id="s1">
+<h2>Encuentra tu próxima estadía</h2><div class="mut">Consulta habitaciones y reserva en línea.</div>
+<label for="dest">Destino</label><select id="dest"><option>Bogotá</option><option>Cartagena</option><option>Medellín</option></select>
+<label for="ent">Entrada</label><input id="ent" type="date" value="2026-11-15">
+<label for="sal">Salida</label><input id="sal" type="date" value="2026-11-17">
+<label for="hue">Huéspedes</label><select id="hue"><option value="1">1 adulto</option><option value="2" selected>2 adultos</option><option value="3">3 personas</option><option value="4">4 personas</option></select>
+<div class="banner" id="e1" role="alert"></div>
+<button class="btn" onclick="buscar()">Buscar habitaciones</button>
+</div>
+
+<!-- 2. Resultados -->
+<div class="scr" id="s2">
+<h2>Habitaciones disponibles</h2><div class="mut" id="res-sum"></div>
+<div id="lista"></div>
+<button class="btn sec" onclick="go('s1')">Modificar búsqueda</button>
+</div>
+
+<!-- 3. Detalle -->
+<div class="scr" id="s3">
+<h2 id="d-nom"></h2><div class="mut" id="d-desc"></div>
+<div id="d-serv" style="margin-top:8px"></div>
+<div class="room"><span class="mut">Precio total</span><b id="d-tot" style="font-size:1.3rem"></b><span class="mut" id="d-det"></span></div>
+<button class="btn" onclick="go('s4')">Reservar</button>
+<button class="btn sec" onclick="go('s2')">Ver otras habitaciones</button>
+</div>
+
+<!-- 4. Datos del huésped -->
+<div class="scr" id="s4">
+<h2>Datos del huésped</h2><div class="mut">Usa datos de prueba, no reales.</div>
+<label for="nom">Nombre completo</label><input id="nom" placeholder="Ej.: Persona Prueba"><div class="msg" id="m-nom"></div>
+<label for="cor">Correo electrónico</label><input id="cor" type="email" placeholder="prueba@ejemplo.com"><div class="msg" id="m-cor"></div>
+<label for="tel">Teléfono</label><input id="tel" inputmode="numeric" placeholder="3000000000"><div class="msg" id="m-tel"></div>
+<div class="room mut" id="resumen"></div>
+<button class="btn" onclick="confirmar()">Confirmar reserva</button>
+<button class="btn sec" onclick="go('s3')">Volver al detalle</button>
+</div>
+
+<!-- 5. Confirmación -->
+<div class="scr" id="s5">
+<h2>¡Reserva simulada con éxito!</h2><div class="mut">Es un prototipo: no se hizo ninguna reserva real.</div>
+<div class="code" id="codigo"></div>
+<div id="conf" class="mut"></div>
+<button class="btn" onclick="go('s1')">Volver al inicio</button>
+</div>
+</div>
+
+<script>
+var rooms=[
+{n:"Habitación Sencilla",cap:1,p:180000,d:"Cama sencilla, escritorio y vista interior. Ideal para viajes de trabajo.",s:["Wi‑Fi","Desayuno","TV"]},
+{n:"Habitación Doble",cap:2,p:260000,d:"Cama doble o dos camas, baño privado y balcón con vista a la ciudad.",s:["Wi‑Fi","Desayuno","Aire acondicionado","Balcón"]},
+{n:"Suite Familiar",cap:4,p:420000,d:"Dos ambientes, sala, dos camas dobles y minibar para hasta cuatro personas.",s:["Wi‑Fi","Desayuno","Minibar","Sala"]}];
+var st={room:null,noches:0,total:0};
+function $(i){return document.getElementById(i)}
+function go(id){["s1","s2","s3","s4","s5"].forEach(function(s){$(s).classList.toggle("on",s===id)})}
+function money(n){return "$"+n.toLocaleString("es-CO")+" COP"}
+function buscar(){
+var a=$("ent").value,b=$("sal").value,e=$("e1");
+if(!a||!b){e.textContent="Elige fecha de entrada y de salida para buscar.";e.style.display="block";return}
+var n=Math.round((new Date(b)-new Date(a))/86400000);
+if(n<1){e.textContent="La salida debe ser después de la entrada. Corrige las fechas y vuelve a buscar.";e.style.display="block";return}
+e.style.display="none";st.noches=n;var h=+$("hue").value;
+var ok=rooms.filter(function(r){return r.cap>=h});
+$("res-sum").textContent=$("dest").value+" · "+n+(n>1?" noches":" noche")+" · "+h+(h>1?" huéspedes":" huésped");
+$("lista").innerHTML=ok.map(function(r){var i=rooms.indexOf(r);return '<div class="room"><b>'+r.n+'</b><span class="mut">Hasta '+r.cap+' · '+money(r.p)+' por noche</span><button class="btn" onclick="ver('+i+')">Ver habitación</button></div>'}).join("");
+go("s2")}
+function ver(i){var r=rooms[i];st.room=r;st.total=r.p*st.noches;
+$("d-nom").textContent=r.n;$("d-desc").textContent=r.d;
+$("d-serv").innerHTML=r.s.map(function(x){return '<span class="pill">'+x+'</span>'}).join("");
+$("d-tot").textContent=money(st.total);$("d-det").textContent=st.noches+" × "+money(r.p);
+$("resumen").innerHTML="<b>Resumen</b><br>"+r.n+"<br>"+$("ent").value+" a "+$("sal").value+" ("+st.noches+" noches)<br>Total: "+money(st.total);
+go("s3")}
+function confirmar(){
+var v={nom:$("nom").value.trim(),cor:$("cor").value.trim(),tel:$("tel").value.trim()},ok=true;
+var rules={nom:[v.nom.length>=3,"Escribe tu nombre completo."],cor:[/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.cor),"Escribe un correo válido, por ejemplo prueba@ejemplo.com."],tel:[/^\d{10}$/.test(v.tel),"Escribe 10 dígitos, sin espacios."]};
+for(var k in rules){var bad=!rules[k][0];$(k).classList.toggle("bad",bad);$("m-"+k).textContent=bad?rules[k][1]:"";if(bad)ok=false}
+if(!ok)return;
+$("codigo").textContent="HP-"+Math.floor(100000+Math.random()*900000);
+$("conf").innerHTML="Huésped (prueba): "+v.nom.replace(/</g,"&lt;")+"<br>"+st.room.n+" · "+st.noches+" noches<br>Total: "+money(st.total);
+go("s5")}
+</script>
+</body>
+</html>
